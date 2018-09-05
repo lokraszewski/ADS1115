@@ -124,39 +124,47 @@ inline bool is_valid_address(const uint8_t address)
   return (address & ~0b11) == 0b1001000;
 }
 
+inline double get_fsr_voltage(const FullScaleRange fsr)
+{
+  switch (fsr)
+  {
+  case FSR_6_144V: return 6.144L;
+  case FSR_4_096V: return 4.096L;
+  case FSR_2_048V: return 2.048L;
+  case FSR_1_024V: return 1.024L;
+  case FSR_0_512V: return 0.512L;
+  default: return 0.256L;
+  }
+}
+
 class ADC
 {
 public:
   ADC(const std::string port, const uint8_t address);
   virtual ~ADC();
 
-  static double get_fsr_voltage(FullScaleRange fsr);
-  void          reset(void) const;
-
-  double  read(const Multiplex mux);
-  int16_t read_raw();
-
   uint16_t read_register(RegisterAddress reg_address);
   void     write_register(RegisterAddress reg_address, const uint16_t value);
+  uint16_t read_config(void);
+  void     write_config(const uint16_t cfg);
+  void     write_config(void);
+  void     write_config_default(void);
+  bool     is_conversion_done(void);
+  double   read(const Multiplex mux);
+  int16_t  read_raw();
 
-  uint16_t read_config_register(void);
-  void     write_config_register(const uint16_t cfg);
-
-  double raw_to_voltage(const int16_t raw_value);
-  void   start_conversion(void);
-  bool   is_conversion_done(void);
-  void   set_fsr(const FullScaleRange fsr);
-  void   set_multiplexing(const Multiplex mult);
-  void   set_data_rate(const DataRate dr);
-  void   set_comparator_queue(const ComparatorQueue cq);
+  void set_fsr(const FullScaleRange fsr);
+  void set_multiplexing(const Multiplex mult);
+  void set_data_rate(const DataRate dr);
 
 private:
-  static constexpr auto DEFAULT_CFG = 0x8583;
+  static constexpr auto DEFAULT_CFG = 0x0583;
   static constexpr auto BIT_NUM     = 15;
-  uint16_t              m_config;
-  i2cImpl*              m_impl;
   const uint8_t         m_address;
-  // bool          m_continous_mode;
+  uint16_t              m_config; /* Packed structure of the configuration. */
+  i2cImpl* const        m_impl;
+
+  double raw_to_voltage(const int16_t raw_value);
 };
 
 } // namespace ADS1115

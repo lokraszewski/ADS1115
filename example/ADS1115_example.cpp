@@ -55,12 +55,16 @@ int run(int argc, char **argv)
   std::cout << "Openning ADS1115 at " << port << " with address: " << address << std::endl;
 
   ADS1115::ADC adc(port, address);
-  std::cout << adc.read_config_register() << std::endl;
 
+  // std::cout <<  << std::endl;
+  // std::cout << adc.read_config_register() << std::endl;
+
+  // std::cout << "Setting FSR to +-" << ADS1115::ADC::get_fsr_voltage(ADS1115::FullScaleRange::FSR_4_096V) << std::endl;
+  adc.set_fsr(ADS1115::FullScaleRange::FSR_4_096V);
   std::cout << " Reading AIN0: " << adc.read(ADS1115::Multiplex::AIN0) << "V" << std::endl;
-  std::cout << " Reading AIN1: " << adc.read(ADS1115::Multiplex::AIN1) << "V" << std::endl;
-  std::cout << " Reading AIN2: " << adc.read(ADS1115::Multiplex::AIN2) << "V" << std::endl;
-  std::cout << " Reading AIN3: " << adc.read(ADS1115::Multiplex::AIN3) << "V" << std::endl;
+  // std::cout << " Reading AIN1: " << adc.read(ADS1115::Multiplex::AIN1) << "V" << std::endl;
+  // std::cout << " Reading AIN2: " << adc.read(ADS1115::Multiplex::AIN2) << "V" << std::endl;
+  // std::cout << " Reading AIN3: " << adc.read(ADS1115::Multiplex::AIN3) << "V" << std::endl;
 
   return 0;
 }
