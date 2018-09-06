@@ -21,9 +21,6 @@ class i2cImpl
 public:
   i2cImpl(std::string path)
   {
-
-    std::cout << __func__ << std::endl;
-
     if ((m_file = open(path.c_str(), O_RDWR)) < 0)
     {
       throw m_file;
@@ -31,7 +28,6 @@ public:
   }
   virtual ~i2cImpl()
   {
-    std::cout << __func__ << std::endl;
     if (m_file > 0)
       close(m_file);
   }

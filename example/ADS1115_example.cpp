@@ -56,15 +56,30 @@ int run(int argc, char **argv)
 
   ADS1115::ADC adc(port, address);
 
-  // std::cout <<  << std::endl;
-  // std::cout << adc.read_config_register() << std::endl;
+  auto config_fsr = ADS1115::FullScaleRange::FSR_4_096V;
+  auto config_dr  = ADS1115::DataRate::SPS_860;
 
-  // std::cout << "Setting FSR to +-" << ADS1115::ADC::get_fsr_voltage(ADS1115::FullScaleRange::FSR_4_096V) << std::endl;
-  adc.set_fsr(ADS1115::FullScaleRange::FSR_4_096V);
-  std::cout << " Reading AIN0: " << adc.read(ADS1115::Multiplex::AIN0) << "V" << std::endl;
-  // std::cout << " Reading AIN1: " << adc.read(ADS1115::Multiplex::AIN1) << "V" << std::endl;
-  // std::cout << " Reading AIN2: " << adc.read(ADS1115::Multiplex::AIN2) << "V" << std::endl;
-  // std::cout << " Reading AIN3: " << adc.read(ADS1115::Multiplex::AIN3) << "V" << std::endl;
+  std::cout << "Setting FSR to +-" << config_fsr << std::endl;
+  std::cout << "Setting DR to " << config_dr << std::endl;
+
+  adc.set_fsr(config_fsr);
+  adc.set_data_rate(config_dr);
+
+  std::cout << "ADC Configuration" << std::endl;
+  std::cout << "\tfsr             : " << adc.get_fsr() << std::endl;
+  std::cout << "\tmultiplexing    : " << adc.get_multiplexing() << std::endl;
+  std::cout << "\tdata rate       : " << adc.get_data_rate() << std::endl;
+  std::cout << "\tconversion mode : " << adc.get_conversion_mode() << std::endl;
+
+  std::cout << ADS1115::Multiplex::AIN0 << " = " << adc.read(ADS1115::Multiplex::AIN0) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN1) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN2 << " = " << adc.read(ADS1115::Multiplex::AIN2) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN3) << " V" << std::endl;
+
+  std::cout << ADS1115::Multiplex::AIN0_AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN1) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN0_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN3) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN1_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN1_AIN3) << " V" << std::endl;
+  std::cout << ADS1115::Multiplex::AIN2_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN2_AIN3) << " V" << std::endl;
 
   return 0;
 }

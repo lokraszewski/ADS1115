@@ -90,15 +90,19 @@ enum ComparatorQueue : uint16_t
   DISABLE          = 0b11, //! Disable comparator and set ALERT/RDY pin to high-impedance (default)
 };
 
+enum ConversionMode : uint16_t
+{
+
+  Continuous = 0,
+  SingleShot = (1 << 8),
+};
+
 enum Config : uint16_t
 {
   OS = (1 << 15),                 /* When writing: 0 : No effect 1 : Start a single conversion (when in
                                    power-down state).  When reading: 0 : Device is currently
                                    performing a conversion 1 : Device is not currently performing a
                                    conversion */
-  MODE = (1 << 10),               /* Device operating mode This bit controls the operating mode. 0 :
-                                   Continuous-conversion mode 1 : Single-shot mode or power-down state
-                                   (default) */
   COMPARATOR_MODE = (1 << 4),     /* Comparator mode (ADS1114 and ADS1115 only) This bit configures the
                                   comparator operating mode. This bit serves no function on the
                                   ADS1113. 0 : Traditional comparator (default) 1 : Window comparator */
@@ -117,6 +121,61 @@ enum Config : uint16_t
                                    * lowest address currently asserting the ALERT/RDY bus line.
                                    */
 };
+
+inline std::ostream& operator<<(std::ostream& os, const FullScaleRange& fsr)
+{
+  switch (fsr)
+  {
+  case FullScaleRange::FSR_6_144V: os << "6.144V"; break;
+  case FullScaleRange::FSR_4_096V: os << "4.096V"; break;
+  case FullScaleRange::FSR_2_048V: os << "2.048V"; break;
+  case FullScaleRange::FSR_1_024V: os << "1.024V"; break;
+  case FullScaleRange::FSR_0_512V: os << "0.512V"; break;
+  default: os << "0.256V"; break;
+  }
+  return os;
+}
+inline std::ostream& operator<<(std::ostream& os, const Multiplex& multi)
+{
+  switch (multi)
+  {
+  case Multiplex::AIN0_AIN1: os << "AIN0_AIN1"; break;
+  case Multiplex::AIN0_AIN3: os << "AIN0_AIN3"; break;
+  case Multiplex::AIN1_AIN3: os << "AIN1_AIN3"; break;
+  case Multiplex::AIN2_AIN3: os << "AIN2_AIN3"; break;
+  case Multiplex::AIN0: os << "AIN0"; break;
+  case Multiplex::AIN1: os << "AIN1"; break;
+  case Multiplex::AIN2: os << "AIN2"; break;
+  case Multiplex::AIN3: os << "AIN3"; break;
+  }
+  return os;
+}
+inline std::ostream& operator<<(std::ostream& os, const DataRate& dr)
+{
+  switch (dr)
+  {
+  case DataRate::SPS_8: os << "8"; break;
+  case DataRate::SPS_16: os << "16"; break;
+  case DataRate::SPS_32: os << "32"; break;
+  case DataRate::SPS_64: os << "64"; break;
+  case DataRate::SPS_128: os << "128"; break;
+  case DataRate::SPS_250: os << "250"; break;
+  case DataRate::SPS_475: os << "475"; break;
+  case DataRate::SPS_860: os << "860"; break;
+  }
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const ConversionMode& mode)
+{
+  switch (mode)
+  {
+  case ConversionMode::Continuous: os << "Continuous"; break;
+  case ConversionMode::SingleShot: os << "Single Shot"; break;
+  }
+
+  return os;
+}
 
 inline bool is_valid_address(const uint8_t address)
 {
@@ -151,11 +210,18 @@ public:
   void     write_config_default(void);
   bool     is_conversion_done(void);
   double   read(const Multiplex mux);
+  double   read(void);
   int16_t  read_raw();
 
   void set_fsr(const FullScaleRange fsr);
   void set_multiplexing(const Multiplex mult);
   void set_data_rate(const DataRate dr);
+  void set_conversion_mode(const ConversionMode mode);
+
+  const FullScaleRange get_fsr(void) const;
+  const Multiplex      get_multiplexing(void) const;
+  const DataRate       get_data_rate(void) const;
+  const ConversionMode get_conversion_mode(void) const;
 
 private:
   static constexpr auto DEFAULT_CFG = 0x0583;
