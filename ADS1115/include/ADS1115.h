@@ -225,10 +225,10 @@ public:
 
 private:
   static constexpr auto DEFAULT_CFG = 0x0583;
-  static constexpr auto BIT_NUM     = 15;
   const uint8_t         m_address;
-  uint16_t              m_config; /* Packed structure of the configuration. */
-  i2cImpl* const        m_impl;
+  uint16_t              m_config; // Packed structure of the configuration. Essentially this is the
+                                  // config register shadow copy.
+  i2cImpl* const m_impl;
 
   double raw_to_voltage(const int16_t raw_value);
 };
