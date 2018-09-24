@@ -45,6 +45,18 @@ enum FullScaleRange : uint16_t
   FSR_0_256V2 = (0b111) << 9, // : FSR = ±0.256 V
 };
 
+/*
+ 000 : FSR = ±6.144 V(1)
+001 : FSR = ±4.096 V(1)
+010 : FSR = ±2.048 V (default)
+011 : FSR = ±1.024 V
+100 : FSR = ±0.512 V
+101 : FSR = ±0.256 V
+110 : FSR = ±0.256 V
+
+
+ */
+
 enum Multiplex : uint16_t
 {
   AIN0_AIN1 = (0b000) << 12, // : AINP = AIN0 and AINN = AIN1 (default)

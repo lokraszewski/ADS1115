@@ -38,9 +38,15 @@ void ADC::write_register(RegisterAddress reg_address, const uint16_t value)
 }
 
 uint16_t ADC::read_config(void) { return read_register(RegisterAddress::Config); }
-void     ADC::write_config(const uint16_t cfg) { write_register(RegisterAddress::Config, cfg); }
-void     ADC::write_config(void) { write_config(m_config); }
-void     ADC::write_config_default(void) { write_config(DEFAULT_CFG); }
+void     ADC::write_config(const uint16_t cfg)
+{
+
+  std::cout << std::hex << " [CFG: 0x" << cfg << "] ";
+
+  write_register(RegisterAddress::Config, cfg);
+}
+void ADC::write_config(void) { write_config(m_config); }
+void ADC::write_config_default(void) { write_config(DEFAULT_CFG); }
 
 bool ADC::is_conversion_done(void)
 {
@@ -67,7 +73,10 @@ int16_t ADC::read_raw()
     ;
 
   // The conversion register stores the latest result.
-  return read_register(RegisterAddress::Conversion);
+  auto r = read_register(RegisterAddress::Conversion);
+
+  std::cout << std::hex << " [RAW: 0x" << r << "] ";
+  return r;
 }
 void ADC::set_fsr(const FullScaleRange fsr)
 {
@@ -103,11 +112,8 @@ const ConversionMode ADC::get_conversion_mode(void) const { return static_cast<C
 
 double ADC::raw_to_voltage(const int16_t raw_value)
 {
-
-  const auto fsr_v  = get_fsr_voltage(get_fsr());
-  double     result = raw_value * (fsr_v / static_cast<double>(0x7FFF));
-
-  return result;
+  const auto fsr_v = get_fsr_voltage(get_fsr());
+  return raw_value * (fsr_v / static_cast<double>(0x7FFF));
 }
 
 } // namespace ADS1115

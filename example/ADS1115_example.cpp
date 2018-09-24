@@ -5,21 +5,12 @@
 
 #include "ADS1115.h"
 
+using endl;
 using std::cerr;
 using std::cout;
-using std::endl;
 using std::exception;
 using std::string;
 using std::vector;
-
-void my_sleep(unsigned long milliseconds)
-{
-#ifdef _WIN32
-  Sleep(milliseconds); // 100 ms
-#else
-  usleep(milliseconds * 1000); // 100 ms
-#endif
-}
 
 void print_usage()
 {
@@ -44,42 +35,42 @@ int run(int argc, char **argv)
 
   if (!ADS1115::is_valid_address(address))
   {
-    std::cout << "Address invalid, possible addresses include: " << std::endl;
-    std::cout << "\t ADR pin to GND: 0x" << std::hex << ADS1115::AddressPin::GND << std::endl;
-    std::cout << "\t ADR pin to VDD: 0x" << std::hex << ADS1115::AddressPin::VDD << std::endl;
-    std::cout << "\t ADR pin to SDA: 0x" << std::hex << ADS1115::AddressPin::SDA << std::endl;
-    std::cout << "\t ADR pin to SCL: 0x" << std::hex << ADS1115::AddressPin::SCL << std::endl;
+    cout << "Address invalid, possible addresses include: " << endl;
+    cout << "\t ADR pin to GND: 0x" << std::hex << ADS1115::AddressPin::GND << endl;
+    cout << "\t ADR pin to VDD: 0x" << std::hex << ADS1115::AddressPin::VDD << endl;
+    cout << "\t ADR pin to SDA: 0x" << std::hex << ADS1115::AddressPin::SDA << endl;
+    cout << "\t ADR pin to SCL: 0x" << std::hex << ADS1115::AddressPin::SCL << endl;
     return -1;
   }
 
-  std::cout << "Openning ADS1115 at " << port << " with address: " << address << std::endl;
+  cout << "Openning ADS1115 at " << port << " with address: " << address << endl;
 
   ADS1115::ADC adc(port, address);
 
-  auto config_fsr = ADS1115::FullScaleRange::FSR_4_096V;
+  auto config_fsr = ADS1115::FullScaleRange::FSR_2_048V;
   auto config_dr  = ADS1115::DataRate::SPS_860;
 
-  std::cout << "Setting FSR to +-" << config_fsr << std::endl;
-  std::cout << "Setting DR to " << config_dr << std::endl;
+  cout << "Setting FSR to +-" << config_fsr << endl;
+  cout << "Setting DR to " << config_dr << endl;
 
   adc.set_fsr(config_fsr);
   adc.set_data_rate(config_dr);
 
-  std::cout << "ADC Configuration" << std::endl;
-  std::cout << "\tfsr             : " << adc.get_fsr() << std::endl;
-  std::cout << "\tmultiplexing    : " << adc.get_multiplexing() << std::endl;
-  std::cout << "\tdata rate       : " << adc.get_data_rate() << std::endl;
-  std::cout << "\tconversion mode : " << adc.get_conversion_mode() << std::endl;
+  cout << "ADC Configuration" << endl;
+  cout << "\tfsr             : " << adc.get_fsr() << endl;
+  cout << "\tmultiplexing    : " << adc.get_multiplexing() << endl;
+  cout << "\tdata rate       : " << adc.get_data_rate() << endl;
+  cout << "\tconversion mode : " << adc.get_conversion_mode() << endl;
 
-  std::cout << ADS1115::Multiplex::AIN0 << " = " << adc.read(ADS1115::Multiplex::AIN0) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN1) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN2 << " = " << adc.read(ADS1115::Multiplex::AIN2) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN3) << " V" << std::endl;
+  cout << ADS1115::Multiplex::AIN0 << " = " << adc.read(ADS1115::Multiplex::AIN0) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN1) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN2 << " = " << adc.read(ADS1115::Multiplex::AIN2) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN3) << " V" << endl;
 
-  std::cout << ADS1115::Multiplex::AIN0_AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN1) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN0_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN3) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN1_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN1_AIN3) << " V" << std::endl;
-  std::cout << ADS1115::Multiplex::AIN2_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN2_AIN3) << " V" << std::endl;
+  cout << ADS1115::Multiplex::AIN0_AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN1) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN0_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN3) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN1_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN1_AIN3) << " V" << endl;
+  cout << ADS1115::Multiplex::AIN2_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN2_AIN3) << " V" << endl;
 
   return 0;
 }
