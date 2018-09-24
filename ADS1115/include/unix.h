@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <exception>
 #include <fcntl.h> //Needed for I2C port
 #include <iostream>
 #include <linux/i2c-dev.h>
@@ -23,7 +24,8 @@ public:
   {
     if ((m_file = open(path.c_str(), O_RDWR)) < 0)
     {
-      throw m_file;
+      const auto message = "Cannot open port " + path;
+      throw std::runtime_error(message);
     }
   }
   virtual ~i2cImpl()
