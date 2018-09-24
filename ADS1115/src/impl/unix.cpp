@@ -11,7 +11,21 @@
 namespace ADS1115
 {
 
-void i2cImpl::begin(uint8_t address) const
+i2cImpl::i2cImpl(std::string path)
+{
+  if ((m_file = open(path.c_str(), O_RDWR)) < 0)
+  {
+    const auto message = "Cannot open port " + path;
+    throw std::runtime_error(message);
+  }
+}
+i2cImpl::~i2cImpl()
+{
+  if (m_file > 0)
+    close(m_file);
+}
+
+void i2cImpl::begin(const uint8_t address) const
 {
   if (ioctl(m_file, I2C_SLAVE, address) < 0)
   {
@@ -19,7 +33,7 @@ void i2cImpl::begin(uint8_t address) const
   }
 }
 
-void i2cImpl::write(uint8_t* data, size_t length) const
+void i2cImpl::write(uint8_t* data, const size_t length) const
 {
 
   if (::write(m_file, data, length) != length)
@@ -27,7 +41,7 @@ void i2cImpl::write(uint8_t* data, size_t length) const
     throw std::runtime_error("Failed to write to the i2c bus.");
   }
 }
-void i2cImpl::read(uint8_t* data, size_t length) const
+void i2cImpl::read(uint8_t* data, const size_t length) const
 {
 
   if (::read(m_file, data, length) != length)

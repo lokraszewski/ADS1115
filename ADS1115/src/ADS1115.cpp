@@ -3,7 +3,7 @@
 namespace ADS1115
 {
 
-ADC::ADC(std::string port, const uint8_t address) : m_config(DEFAULT_CFG), m_impl(new i2cImpl(port)), m_address(address) {}
+ADC::ADC(std::string port, const uint8_t address) : m_impl(new i2cImpl(port)), m_address(address), m_config(DEFAULT_CFG) {}
 
 ADC::~ADC() { delete m_impl; }
 

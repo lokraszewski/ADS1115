@@ -20,22 +20,11 @@ class i2cImpl
 {
 
 public:
-  i2cImpl(std::string path)
-  {
-    if ((m_file = open(path.c_str(), O_RDWR)) < 0)
-    {
-      const auto message = "Cannot open port " + path;
-      throw std::runtime_error(message);
-    }
-  }
-  virtual ~i2cImpl()
-  {
-    if (m_file > 0)
-      close(m_file);
-  }
-  void begin(uint8_t address) const;
-  void write(uint8_t* data, size_t length) const;
-  void read(uint8_t* data, size_t length) const;
+  i2cImpl(std::string path);
+  virtual ~i2cImpl();
+  void begin(const uint8_t address) const;
+  void write(uint8_t* data, const size_t length) const;
+  void read(uint8_t* data, const size_t length) const;
 
 private:
   int m_file;
