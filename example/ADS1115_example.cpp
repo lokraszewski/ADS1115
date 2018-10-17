@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 #include "ADS1115.h"
 #include "unix.h"
@@ -31,8 +32,9 @@ int run(int argc, char **argv)
 
   // Argument 1 is the serial port or enumerate flag
   // Argument 2 is the address of the chip in hex.
-  string  port(argv[1]);
-  uint8_t address = std::stoul(argv[2], nullptr, 16);
+  // string  port(argv[1]);
+  const auto port    = argv[1];
+  uint8_t    address = std::stoul(argv[2], nullptr, 16);
 
   if (!ADS1115::is_valid_address(address))
   {
@@ -46,7 +48,7 @@ int run(int argc, char **argv)
 
   cout << "Openning ADS1115 at " << port << " with address: " << address << endl;
 
-  ADS1115::ADC<ADS1115::i2cImpl> adc(port, address);
+  ADS1115::ADC<unix_i2c::i2c> adc(port, address);
 
   auto config_fsr = ADS1115::FullScaleRange::FSR_2_048V;
   auto config_dr  = ADS1115::DataRate::SPS_860;

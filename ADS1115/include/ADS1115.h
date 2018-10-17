@@ -1,12 +1,7 @@
 
 #pragma once
 
-#include <exception>
-#include <limits>
-#include <sstream>
-#include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace ADS1115
 {
@@ -201,7 +196,8 @@ template <class impl_t>
 class ADC
 {
 public:
-  ADC(const std::string port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  // ADC(const char* const port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  ADC(const void* port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
   ADC(const uint port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
   ~ADC() {}
 

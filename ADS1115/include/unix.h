@@ -11,18 +11,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace ADS1115
+namespace unix_i2c
 {
 
 using std::size_t;
 
-class i2cImpl
+class i2c
 {
 
 public:
-  i2cImpl(std::string path);
-  i2cImpl(uint) = delete;
-  ~i2cImpl();
+  i2c(const void* arg);
+  i2c(const char* const arg);
+  i2c(uint) = delete;
+  ~i2c();
   void begin(const uint8_t address) const;
   void write(uint8_t* data, const size_t length) const;
   void read(uint8_t* data, const size_t length) const;
@@ -31,4 +32,4 @@ private:
   int m_file;
 };
 
-} // namespace ADS1115
+} // namespace unix_i2c
