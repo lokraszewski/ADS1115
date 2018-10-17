@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "ADS1115.h"
+#include "unix.h"
 
 using std::cerr;
 using std::cout;
@@ -45,7 +46,7 @@ int run(int argc, char **argv)
 
   cout << "Openning ADS1115 at " << port << " with address: " << address << endl;
 
-  ADS1115::ADC adc(port, address);
+  ADS1115::ADC<ADS1115::i2cImpl> adc(port, address);
 
   auto config_fsr = ADS1115::FullScaleRange::FSR_2_048V;
   auto config_dr  = ADS1115::DataRate::SPS_860;

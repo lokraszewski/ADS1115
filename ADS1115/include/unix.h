@@ -21,7 +21,8 @@ class i2cImpl
 
 public:
   i2cImpl(std::string path);
-  virtual ~i2cImpl();
+  i2cImpl(uint) = delete;
+  ~i2cImpl();
   void begin(const uint8_t address) const;
   void write(uint8_t* data, const size_t length) const;
   void read(uint8_t* data, const size_t length) const;

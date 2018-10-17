@@ -1,18 +1,12 @@
 
+#pragma once
+
 #include <exception>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#ifdef __linux__
-#include "unix.h" // i2cImpl
-#else
-#error "No imeplementation found. "
-#endif
-
-#pragma once
 
 namespace ADS1115
 {
@@ -44,18 +38,6 @@ enum FullScaleRange : uint16_t
   FSR_0_256V1 = (0b110) << 9, // : FSR = ±0.256 V
   FSR_0_256V2 = (0b111) << 9, // : FSR = ±0.256 V
 };
-
-/*
- 000 : FSR = ±6.144 V(1)
-001 : FSR = ±4.096 V(1)
-010 : FSR = ±2.048 V (default)
-011 : FSR = ±1.024 V
-100 : FSR = ±0.512 V
-101 : FSR = ±0.256 V
-110 : FSR = ±0.256 V
-
-
- */
 
 enum Multiplex : uint16_t
 {
@@ -208,41 +190,108 @@ inline double get_fsr_voltage(const FullScaleRange fsr)
   }
 }
 
+/**
+ * \date       17-Oct-2018
+ * \brief      Class for ADS1115.
+ *
+ * \tparam     impl_t  I2C implemention see unix.h for example.
+ *
+ */
+template <class impl_t>
 class ADC
 {
 public:
-  ADC(const std::string port, const uint8_t address);
-  virtual ~ADC();
+  ADC(const std::string port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  ADC(const uint port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  ~ADC() {}
 
-  uint16_t read_register(RegisterAddress reg_address);
-  void     write_register(RegisterAddress reg_address, const uint16_t value);
-  uint16_t read_config(void);
-  void     write_config(const uint16_t cfg);
-  void     write_config(void);
-  void     write_config_default(void);
-  bool     is_conversion_done(void);
-  double   read(const Multiplex mux);
-  double   read(void);
-  int16_t  read_raw();
+  uint16_t read_register(RegisterAddress reg_address)
+  {
+    uint8_t tx[1] = {static_cast<uint8_t>(reg_address)};
+    uint8_t rx[2];
 
-  void set_fsr(const FullScaleRange fsr);
-  void set_multiplexing(const Multiplex mult);
-  void set_data_rate(const DataRate dr);
-  void set_conversion_mode(const ConversionMode mode);
+    m_impl.begin(m_address);
+    m_impl.write(tx, 1);
+    m_impl.read(rx, 2);
 
-  const FullScaleRange get_fsr(void) const;
-  const Multiplex      get_multiplexing(void) const;
-  const DataRate       get_data_rate(void) const;
-  const ConversionMode get_conversion_mode(void) const;
+    return (rx[0] << 8) | rx[1];
+  }
+  void write_register(RegisterAddress reg_address, const uint16_t value)
+  {
+    uint8_t tx[3] = {static_cast<uint8_t>(reg_address), static_cast<uint8_t>(value >> 8), static_cast<uint8_t>(value & 0xFF)};
+    m_impl.begin(m_address);
+    m_impl.write(tx, 3);
+  }
+
+  uint16_t read_config(void) { return read_register(RegisterAddress::Config); }
+  void     write_config(const uint16_t cfg) { write_register(RegisterAddress::Config, cfg); }
+  void     write_config(void) { write_config(m_config); }
+  void     write_config_default(void) { write_config(DEFAULT_CFG); }
+  bool     is_conversion_done(void) { return (read_config() & Config::OS); }
+  double   read(const Multiplex mux)
+  {
+    set_multiplexing(mux);
+    return raw_to_voltage(read_raw());
+  }
+  double  read(void) { return raw_to_voltage(read_raw()); }
+  int16_t read_raw()
+  {
+    // Conviently we can send the configuration and the conversion request in one
+    // command.
+    write_config(m_config | Config::OS);
+
+    // Once the conversion has been requested we must wait for it do be finished.
+    while (!is_conversion_done())
+      ;
+
+    // The conversion register stores the latest result.
+    return read_register(RegisterAddress::Conversion);
+  }
+
+  void set_fsr(const FullScaleRange fsr)
+  {
+    m_config &= ~FSR_0_256V2;
+    m_config |= fsr;
+  }
+  void set_multiplexing(const Multiplex mult)
+  {
+    m_config &= ~AIN3;
+    m_config |= mult;
+  }
+  void set_data_rate(const DataRate dr)
+  {
+    m_config &= ~SPS_860;
+    m_config |= dr;
+  }
+  void set_conversion_mode(const ConversionMode mode)
+  {
+    if (mode)
+    {
+      m_config |= ConversionMode::SingleShot;
+    }
+    else
+    {
+      m_config &= ~ConversionMode::SingleShot;
+    }
+  }
+
+  const FullScaleRange get_fsr(void) const { return static_cast<FullScaleRange>((m_config & FullScaleRange::FSR_0_256V2)); }
+  const Multiplex      get_multiplexing(void) const { return static_cast<Multiplex>((m_config & Multiplex::AIN3)); }
+  const DataRate       get_data_rate(void) const { return static_cast<DataRate>((m_config & DataRate::SPS_860)); }
+  const ConversionMode get_conversion_mode(void) const { return static_cast<ConversionMode>(m_config & ConversionMode::SingleShot); }
 
 private:
-  static constexpr auto DEFAULT_CFG = 0x0583;
-  i2cImpl* const        m_impl;
-  const uint8_t         m_address;
-  uint16_t              m_config; // Packed structure of the configuration. Essentially this is the
-                                  // config register shadow copy.
+  static constexpr auto DEFAULT_CFG = 0x0583; // Default register configuration.
+  impl_t                m_impl;
+  const uint8_t         m_address; // I2C address, fixed at construction.
+  uint16_t              m_config;  // Packed structure of the configuration. Essentially this is the
+                                   // config register shadow copy.
 
-  double raw_to_voltage(const int16_t raw_value);
+  double raw_to_voltage(const int16_t raw_value)
+  {
+    const auto fsr_v = get_fsr_voltage(get_fsr());
+    return raw_value * (fsr_v / static_cast<double>(0x7FFF));
+  }
 };
 
 } // namespace ADS1115

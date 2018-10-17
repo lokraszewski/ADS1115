@@ -1,6 +1,6 @@
 # Sources
 set(SRC_FILES
-    src/ADS1115.cpp
+    # src/ADS1115.cpp
 )
 
 if(UNIX)
