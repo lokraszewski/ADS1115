@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ADS1115.h"
-#include "unix.h"
+#include "unix.h" //THis example relies on the unix implementaion.
 
 using std::cerr;
 using std::cout;
@@ -20,6 +20,17 @@ void print_usage()
   cerr << "<i2c port address> " << endl;
   cerr << "<i2c address in hex> " << endl;
 }
+
+namespace
+{
+template <typename T>
+void read_mux(ADS1115::ADC<T> &adc, ADS1115::Multiplex mux)
+{
+  double val;
+  auto   err = adc.read(mux, val);
+  cout << mux << " = " << val << " V" << endl;
+}
+}; // namespace
 
 int run(int argc, char **argv)
 {
@@ -64,16 +75,20 @@ int run(int argc, char **argv)
   cout << "\tmultiplexing    : " << adc.get_multiplexing() << endl;
   cout << "\tdata rate       : " << adc.get_data_rate() << endl;
   cout << "\tconversion mode : " << adc.get_conversion_mode() << endl;
+  read_mux<>(adc, ADS1115::Multiplex::AIN0);
+  read_mux<>(adc, ADS1115::Multiplex::AIN1);
+  read_mux<>(adc, ADS1115::Multiplex::AIN2);
+  read_mux<>(adc, ADS1115::Multiplex::AIN3);
+  // read_mux
+  // cout << ADS1115::Multiplex::AIN0 << " = " << adc.read(ADS1115::Multiplex::AIN0) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN1) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN2 << " = " << adc.read(ADS1115::Multiplex::AIN2) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN3) << " V" << endl;
 
-  cout << ADS1115::Multiplex::AIN0 << " = " << adc.read(ADS1115::Multiplex::AIN0) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN1) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN2 << " = " << adc.read(ADS1115::Multiplex::AIN2) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN3) << " V" << endl;
-
-  cout << ADS1115::Multiplex::AIN0_AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN1) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN0_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN3) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN1_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN1_AIN3) << " V" << endl;
-  cout << ADS1115::Multiplex::AIN2_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN2_AIN3) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN0_AIN1 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN1) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN0_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN0_AIN3) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN1_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN1_AIN3) << " V" << endl;
+  // cout << ADS1115::Multiplex::AIN2_AIN3 << " = " << adc.read(ADS1115::Multiplex::AIN2_AIN3) << " V" << endl;
 
   return 0;
 }

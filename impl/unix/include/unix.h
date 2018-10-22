@@ -1,5 +1,6 @@
 #pragma once
 
+#include "error.h"
 #include <cstdint>
 #include <exception>
 #include <fcntl.h> //Needed for I2C port
@@ -24,9 +25,9 @@ public:
   i2c(const char* const arg);
   i2c(uint) = delete;
   ~i2c();
-  void begin(const uint8_t address) const;
-  void write(uint8_t* data, const size_t length) const;
-  void read(uint8_t* data, const size_t length) const;
+  ADS1115::Error begin(const uint8_t address) const;
+  ADS1115::Error write(uint8_t* data, const size_t length) const;
+  ADS1115::Error read(uint8_t* data, const size_t length) const;
 
 private:
   int m_file;

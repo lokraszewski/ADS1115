@@ -23,7 +23,12 @@ endif()
 add_subdirectory(ADS1115)
 
 ## Uncomment for example
-add_executable(ADS1115_example example/ADS1115_example.cpp)
+add_executable(ADS1115_example example/ADS1115_example.cpp impl/unix/src/unix.cpp)
+target_include_directories(${PROJECT_NAME}_example
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/impl/unix/include>
+    $<INSTALL_INTERFACE:include>
+)
 add_dependencies(ADS1115_example ${PROJECT_NAME})
 target_link_libraries(ADS1115_example ${PROJECT_NAME})
 

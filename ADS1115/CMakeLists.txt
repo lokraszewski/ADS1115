@@ -1,29 +1,17 @@
-# Sources
-set(SRC_FILES
-    # src/ADS1115.cpp
-)
-
-if(UNIX)
-    list(APPEND SRC_FILES src/impl/unix.cpp)
-endif()
-
-message(STATUS "Building ${PROJECT_NAME} with: ")
-foreach (_src ${SRC_FILES})
-    message(STATUS "  ${_src}")
-endforeach()
-
 
 ## Add serial library
-add_library(${PROJECT_NAME} ${SRC_FILES})
+add_library(${PROJECT_NAME} INTERFACE)
 
 # setup include directories
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(
+  ${PROJECT_NAME}
+  INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
 if(UNIX)
-  target_link_libraries(${PROJECT_NAME} rt pthread)
+  target_link_libraries(${PROJECT_NAME} INTERFACE rt pthread)
 endif()
 
  # setup export preprocessor definitions
