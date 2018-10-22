@@ -15,5 +15,7 @@ enum Error
   ERROR,
   BUSY,
   TIMEOUT,
+  BAD_ADDRESS,
+  IO,
 };
 };

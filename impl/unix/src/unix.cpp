@@ -18,15 +18,12 @@ ADS1115::Error get_err(const int err)
   switch (err)
   {
   case 0: return ADS1115::Error::NONE;
-  case EFAULT:
-  case EINVAL:
-  case ENOTTY:
-  case EAGAIN:
-  case EBADF:
-  case EINTR:
-  case EIO:
+  case EAGAIN: return ADS1115::Error::BUSY;
   case EISDIR:
-
+  case EBADF:
+  case EFAULT: return ADS1115::Error::BAD_ADDRESS;
+  case EIO: return ADS1115::Error::IO;
+  case EINVAL: return ADS1115::Error::INVALID_ARG;
   default: return ADS1115::Error::ERROR;
   }
 }
