@@ -1,7 +1,13 @@
 
 #pragma once
 
+#ifdef __unix__
+#define ADS1115_STREAM_OP 1
+#else
 #define ADS1115_STREAM_OP 0
+#endif
+
+
 #if ADS1115_STREAM_OP
 #include <iostream>
 #endif
