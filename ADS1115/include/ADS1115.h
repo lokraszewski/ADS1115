@@ -1,12 +1,18 @@
 
 #pragma once
 
-#include <exception>
-#include <limits>
-#include <sstream>
-#include <stdexcept>
+#ifdef __unix__
+#define ADS1115_STREAM_OP 1
+#else
+#define ADS1115_STREAM_OP 0
+#endif
+
+
+#if ADS1115_STREAM_OP
+#include <iostream>
+#endif
+#include "error.h"
 #include <string>
-#include <vector>
 
 namespace ADS1115
 {
@@ -115,7 +121,7 @@ enum Config : uint16_t
                                    * lowest address currently asserting the ALERT/RDY bus line.
                                    */
 };
-
+#if ADS1115_STREAM_OP
 inline std::ostream& operator<<(std::ostream& os, const FullScaleRange& fsr)
 {
   switch (fsr)
@@ -170,6 +176,7 @@ inline std::ostream& operator<<(std::ostream& os, const ConversionMode& mode)
 
   return os;
 }
+#endif
 
 inline bool is_valid_address(const uint8_t address)
 {
@@ -201,51 +208,90 @@ template <class impl_t>
 class ADC
 {
 public:
-  ADC(const std::string port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  ADC(const char* const port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
+  ADC(void* const port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
   ADC(const uint port, const uint8_t address) : m_impl(port), m_address(address), m_config(DEFAULT_CFG) {}
   ~ADC() {}
 
-  uint16_t read_register(RegisterAddress reg_address)
+  Error read_register(RegisterAddress reg_address, uint16_t& reg)
   {
     uint8_t tx[1] = {static_cast<uint8_t>(reg_address)};
     uint8_t rx[2];
 
-    m_impl.begin(m_address);
-    m_impl.write(tx, 1);
-    m_impl.read(rx, 2);
+    auto err = m_impl.begin(m_address);
 
-    return (rx[0] << 8) | rx[1];
+    if (err == Error::NONE)
+      err = m_impl.write(tx, 1);
+
+    if (err == Error::NONE)
+      err = m_impl.read(rx, 2);
+
+    if (err == Error::NONE)
+      reg = (rx[0] << 8) | rx[1];
+
+    return err;
   }
-  void write_register(RegisterAddress reg_address, const uint16_t value)
+  Error write_register(RegisterAddress reg_address, const uint16_t value)
   {
     uint8_t tx[3] = {static_cast<uint8_t>(reg_address), static_cast<uint8_t>(value >> 8), static_cast<uint8_t>(value & 0xFF)};
-    m_impl.begin(m_address);
-    m_impl.write(tx, 3);
+    auto    err   = m_impl.begin(m_address);
+    if (err == Error::NONE)
+      err = m_impl.write(tx, 3);
+    return err;
   }
 
-  uint16_t read_config(void) { return read_register(RegisterAddress::Config); }
-  void     write_config(const uint16_t cfg) { write_register(RegisterAddress::Config, cfg); }
-  void     write_config(void) { write_config(m_config); }
-  void     write_config_default(void) { write_config(DEFAULT_CFG); }
-  bool     is_conversion_done(void) { return (read_config() & Config::OS); }
-  double   read(const Multiplex mux)
+  Error read_config(uint16_t& cfg) { return read_register(RegisterAddress::Config, cfg); }
+  Error write_config(const uint16_t cfg) { return write_register(RegisterAddress::Config, cfg); }
+  Error write_config(void) { return write_config(m_config); }
+  Error write_config_default(void) { return write_config(DEFAULT_CFG); }
+  Error is_conversion_done(bool& done)
+  {
+    uint16_t   cfg = 0;
+    const auto err = read_config(cfg);
+    done           = (cfg & Config::OS) ? true : false;
+    return err;
+  }
+
+  Error read(const Multiplex mux, double& val)
   {
     set_multiplexing(mux);
-    return raw_to_voltage(read_raw());
+    return read(val);
   }
-  double  read(void) { return raw_to_voltage(read_raw()); }
-  int16_t read_raw()
+
+  Error read(double& val)
+  {
+    int16_t    val_raw = 0;
+    const auto err     = read_raw(val_raw);
+    val                = raw_to_voltage(val_raw);
+    return err;
+  }
+
+  Error read_raw(int16_t& val)
   {
     // Conviently we can send the configuration and the conversion request in one
     // command.
-    write_config(m_config | Config::OS);
+    auto err = write_config(m_config | Config::OS);
+    if (err != Error::NONE)
+      return err;
 
     // Once the conversion has been requested we must wait for it do be finished.
-    while (!is_conversion_done())
-      ;
+    bool done = false;
+    do
+    {
+      err = is_conversion_done(done);
+      if (err != Error::NONE)
+        return err;
 
+    } while (!done);
+
+    uint16_t reg = 0;
     // The conversion register stores the latest result.
-    return read_register(RegisterAddress::Conversion);
+    err = read_register(RegisterAddress::Conversion, reg);
+
+    if (err == Error::NONE)
+      val = static_cast<int16_t>(reg);
+
+    return err;
   }
 
   void set_fsr(const FullScaleRange fsr)

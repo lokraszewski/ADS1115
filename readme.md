@@ -1,5 +1,5 @@
 # ADS1115
-C++ I2C driver for the Texas Instruments ADS1115. Currently only supports Linux in single shot read.
+C++ I2C driver for the Texas Instruments ADS1115. 
 
 ## Prerequisites
 * [cmake](https://cmake.org/)
@@ -16,6 +16,11 @@ The repository comes with an example application *bin/ADS1115_example* to run on
 ```
 ./build/bin/ADS1115_example "/dev/i2c-1" 0x48
 ```
+
+## Currently Supported ##
+* Linux
+* STM HAL (blocking mode)
+
 ## TODOs ##
 * Add support for continous read mode. 
 
