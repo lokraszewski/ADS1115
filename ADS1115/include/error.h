@@ -17,5 +17,6 @@ enum Error
   TIMEOUT,
   BAD_ADDRESS,
   IO,
+  INVALID_ARG,
 };
 };
